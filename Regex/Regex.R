@@ -263,3 +263,13 @@ names(titanic)
 # Extrair o nome de Solteira (quando necessário)
 
 
+# DATASUS -----------------------------------------------------------------
+
+# https://datasus.saude.gov.br/transferencia-de-arquivos/#
+
+library(read.dbc)
+
+dados <- read.dbc("../dados/arquivo/PASP1801a.dbc")
+glimpse(dados)
+
+unique(dados$PA_RACACOR)
