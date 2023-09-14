@@ -180,6 +180,19 @@ dt <- gsub("([-/])(\\d{3})$", "\\10\\2",dt)
 # numero
 # Cidade/Planeta
 
+v <- pdf[grep("Endereço", pdf)]
+v <- gsub("CEP.*", "", v)
+v <- gsub("Endereço: *", "", v)
+
+Numeros <- str_extract(v, "\\d+")
+# ifelse(is.na(Numeros), "SN", Numeros)
+lista_log <- str_split(v, ",")
+Logradouro <- lapply(lista_log, function(x) x[1]) %>% Reduce(c, .)
+
+Bairro <- gsub(".*,", "", v)
+
+Bairro <- Bairro %>% trimws("both") %>% gsub("\\.", "", .)
+
 dt_char <- dt
 
 dt <- dmy(dt)
@@ -193,6 +206,14 @@ y <- str_extract(y, "\\S+(?= \\(aka)")
 
 
 
+# data frame
+
+df <- data.frame(Nome = x, Alias = y, CEP = z, CPF = cpf,
+           telefone, "Data de nascimento" = dt, Logradouro,
+           Numero = Numeros, Bairro)
+
+openxlsx::write.xlsx(df, "resultado.xlsx")
+
 # Titanic -----------------------------------------------------------------
 
 # https://www.kaggle.com/code/elijahrona/analysis-with-regular-expressions-regex/input
@@ -203,6 +224,38 @@ titanic <- read.csv("titanic.csv") %>%
 titanic %>% 
   filter(grepl("Cumings", Name))
 
+pronome <- str_extract(titanic$Name, "[A-Za-z]+(?=\\.)")
+sum(is.na(pronome))
+
+lastname <- str_extract(titanic$Name, "[A-Za-z]+(?=,)")
+titanic$Name[992]
+name <- str_extract(titanic$Name, "(?<=\\. ).*(?=\\()|(?<=\\. ).*$")
+name <- trimws(name, "both")
+
+df <- data.frame(name, lastname, pronome, original = titanic$Name)
+View(df)
+
+unique(df$pronome)
+
+str_extract(df$original, "(?<=\\().*(?=\\))")
+
+df %>% 
+  rowwise() %>% 
+  mutate(
+    singlename = case_when(
+      grepl("Mrs|mrs|MRS|[cC]ountess|[lL]ady|Mlle", pronome) ~ str_extract(original, "(?<=\\().*(?=\\))"),
+      TRUE ~ NA_character_
+    )
+  ) %>% View
+
+df %>% 
+  filter(grepl("Mr(s)?", pronome)) %>% View
+
+x <- "Banana Nanana"
+
+str_extract_all(x, "(?<=N).*(?=a)")
+
+glimpse(titanic)
 names(titanic)
 
 # Extrair o nome
