@@ -268,8 +268,59 @@ names(titanic)
 # https://datasus.saude.gov.br/transferencia-de-arquivos/#
 
 library(read.dbc)
-
-dados <- read.dbc("../dados/arquivo/PASP1801a.dbc")
+library(tidyverse)
+dados <- read.dbc("../../../Estudos/TCC_MBA/Dados/SIA_PA/PASP1501a.dbc")
 glimpse(dados)
 
 unique(dados$PA_RACACOR)
+
+tab <- read.table("RACA_COR.CNV", skip = 1, sep = ";", encoding = "latin1")
+
+tab$V1
+
+cod_prob <- str_extract(tab$V1[10], "1M.*") %>% 
+  str_split_1(",") %>% trimws("both")
+desc_prob <- rep("RAÇA/COR  (OUTROS INDEVIDOS)", length(cod_prob))
+
+
+cod_bom <- tab$V1 %>% 
+  gsub(",", "", .) %>% 
+  str_extract("\\d+\\s*$") %>% trimws("both")
+cod_bom <- cod_bom[1:9]
+
+
+desc_bom <- tab$V1[1:9] %>% 
+  gsub(",", "", .) %>% 
+  trimws("both") %>% 
+  str_extract("(?<=^\\d).*(?=\\d{2}$)") %>% 
+  gsub("^\\d+", "", .) %>% 
+  trimws("both") 
+
+
+df <- data.frame(descricao  = c(desc_prob, desc_bom), codigo = c(cod_bom, cod_prob))
+
+
+
+unique(dados$PA_RACACOR)
+typeof(dados$PA_RACACOR)
+glimpse(dados)
+
+dados %>% 
+  mutate(
+    PA_RACACOR = as.character(PA_RACACOR)
+  ) %>% 
+  select(PA_MUNPCN, PA_RACACOR) %>% 
+  left_join(df, by = c("PA_RACACOR" = "codigo"))
+
+
+c("Thomas melhor professor ever",
+  "Thomas pior professor ever") %>% 
+  str_extract("Thomas .* professor") %>% 
+  gsub("Thomas ", "", .) %>% 
+  gsub(" professor", "", .)
+
+
+c("Thomas melhor professor ever",
+  "Thomas pior professor ever",
+  "Cláudia melhor professora") %>% 
+  str_extract("(?<=Thomas ).*(?= professor)") 
