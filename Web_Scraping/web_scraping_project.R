@@ -38,7 +38,15 @@ remDr$navigate(hh)
 Sys.sleep(15)
 
 # Obrigar o robozinho clicar na aba
+
+# cuidado com a diferença
+aba <- remDr$findElement(using = "xpath", value = "/html/body/div[2]/div[2]/div/div[3]/ul/li[1]/a")
+aba$clickElement()
 # /html/body/div[2]/div[2]/div/div[3]/ul/li[1]/a
+
+aba <- remDr$findElements(using = "xpath", value = "/html/body/div[2]/div[2]/div/div[3]/ul/li[1]/a")
+aba[[1]]$clickElement()
+
 
 # finding elements
 radio_buttom <- remDr$findElements(using = "id", value = "consulta_avancada_rad_buscar_por")
@@ -60,11 +68,22 @@ remDr$findElement(using = "id", value = "btnPesqAvancada")$clickElement()
 Sys.sleep(15)
 
 
+# 
 # find  table in html
-tab <- remDr$findElement(using = "xpath", value = "/html/body/div[2]/div[2]/div/div[3]/div[1]/div/div/table/tbody")
+# //*[@id="tbyDados"] //*[@id="tbyDados"] 
+tab <- remDr$findElement(using = "xpath", value = "//*[@id=\"tbyDados\"]")
+# tab <- remDr$findElement(using = "xpath", value = "/html/body/div[2]/div[2]/div/div[3]/div[1]/div/div/table/tbody")
 img <- tab$findChildElements(using = "tag", "img")
 
+
 pop <- lapply(img, function(x) x$getElementAttribute("onclick"))
+
+# 
+# l <- list(
+#   c(1, 2, 3), c(2, 1, 7), c(4, 3, 9)
+# )
+# 
+# lapply(l, function(x) sum(x))
 
 pop <- Reduce(c, pop) %>% Reduce(c, .)
 pop <- str_extract(pop, "(?<=popup\\(\\').*(?=\\',)")
@@ -107,10 +126,10 @@ extract <- function(xx){
   end2 <- str_extract(jsonText[linha], "(?<=link=\\\").*(?=\\\")")
   
   
-  pagina3 <- httr::GET(paste0(wpage, end2))
-  jsonText <- httr::content(x = pagina3, as = "text", encoding = "latin1")
-  jsonText <- str_split_1(jsonText, "\\n")
-  
+  # pagina3 <- httr::GET(paste0(wpage, end2))
+  # jsonText <- httr::content(x = pagina3, as = "text", encoding = "latin1")
+  # jsonText <- str_split_1(jsonText, "\\n")
+  # 
   page <- read_html(paste0(wpage, end2))
   
   
@@ -151,12 +170,12 @@ df <- df %>%
   mutate(
     nr = row_number()
   )
-openxlsx::write.xlsx(df, "output/raw_data.xlsx")
+openxlsx::write.xlsx(df, "raw_data.xlsx")
 
 
 df %>% 
   distinct(nome, email, cidade, UF, .keep_all = TRUE) %>% 
-  openxlsx::write.xlsx("output/filtered_data.xlsx")
+  openxlsx::write.xlsx("filtered_data.xlsx")
 
 
 #close the server
