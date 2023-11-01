@@ -27,3 +27,8 @@ INSERT INTO produtos(produto, preco) VALUES ('Bicicleta Aro 29 Mountain Bike End
 INSERT INTO produtos(produto, preco) VALUES ('Bicicleta Altools Stroll Aro 26 Freio À Disco 21 Marchas', 9201.00);
 
 
+CREATE TABLE Produtos(
+  IDProduto int PRIMARY KEY,
+  Produto Varchar(100),
+  Preco Numeric(10,2)
+);
