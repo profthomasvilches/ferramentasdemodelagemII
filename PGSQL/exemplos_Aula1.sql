@@ -113,6 +113,10 @@ WHERE cc > 500
 
 -- JOIN
 -- criando uma tabelinha chamada tab_nova
+WITH tab_nova AS (SELECT product_id, COUNT(*) AS cc
+FROM sales.funnel
+GROUP BY product_id)
+
 SELECT tab_nova.product_id, brand, model, cc  
 FROM tab_nova LEFT JOIN
 (
@@ -151,3 +155,14 @@ WHERE first_name = 'ANA'
 SELECT DISTINCT first_name
 FROM sales.customers
 WHERE first_name <> 'ANA' -- diferente de
+
+
+-- SUBQUERY
+
+
+SELECT * 
+FROM sales.products LEFT JOIN
+(SELECT product_id, COUNT(*) AS cc
+FROM sales.funnel
+GROUP BY product_id) AS tab_nova
+ON sales.products.product_id = tab_nova.product_id
