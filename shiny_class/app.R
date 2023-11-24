@@ -14,9 +14,10 @@ library(tidyverse)
 
 # Define UI for application that draws a histogram
 ui <- tagList(
-    theme = shinytheme("slate"),
+    
     # Application title
     navbarPage(
+      theme = shinytheme("united"),
       # theme = "cerulean",  # <--- To use a theme, uncomment this
       "shinythemes",
       tabPanel("Iris",
@@ -71,15 +72,29 @@ server <- function(input, output) {
   
   # Lendo arquivo
   
-  df <- read.csv("data/Pokemon_full.csv")
+  df <- reactive({
+    if(!is.null(input$arquivo))
+      read.csv(input$arquivo$datapath)
+    else
+      NULL
+
+  })
   
-  updateCheckboxGroupInput(
-    session = getDefaultReactiveDomain(),
-    "pokemontype",
-    label = "Tipo",
-    choices = unique(df$type)[order(unique(df$type))],
-    selected = unique(df$type)
-  )
+  # 
+  observe({
+    
+    if(!is.null(df()))
+      updateCheckboxGroupInput(
+        session = getDefaultReactiveDomain(),
+        "pokemontype",
+        label = "Tipo",
+        choices = unique(df()$type)[order(unique(df()$type))],
+        selected = unique(df()$type)
+      )
+    
+  })
+  
+  
   
 
     output$distPlot <- renderPlot({
@@ -104,22 +119,25 @@ server <- function(input, output) {
       
     })
     
-    
+
     output$plotpokemon <- renderPlot({
       # generate bins based on input$bins from ui.R
-      df %>% 
-        filter(is.null(input$pokemontype) | type %in% input$pokemontype) %>%
-        select(type, hp, attack, defense, speed) %>% 
-        pivot_longer(2:5, names_to = "medida", values_to = "value") %>% 
-        filter(input$attribute == "All" | medida == input$attribute) %>%
-        # draw the histogram with the specified number of bins
-        ggplot(aes(x = type, y = value, color = type, fill = type))+
-        geom_boxplot(alpha = 0.4)+
-        facet_wrap(.~medida, nrow = 2)+
-        theme_bw()+
-        theme(
-          axis.text.x = element_blank()
-        )
+      if(!is.null(df()))
+        df() %>%
+          filter(is.null(input$pokemontype) | type %in% input$pokemontype) %>%
+          select(type, hp, attack, defense, speed) %>%
+          pivot_longer(2:5, names_to = "medida", values_to = "value") %>%
+          filter(input$attribute == "All" | medida == input$attribute) %>%
+          # draw the histogram with the specified number of bins
+          ggplot(aes(x = type, y = value, color = type, fill = type))+
+          geom_boxplot(alpha = 0.4)+
+          facet_wrap(.~medida, nrow = 2)+
+          theme_bw()+
+          theme(
+            axis.text.x = element_blank()
+          )
+      else
+        ggplot()
     })
     
 }
