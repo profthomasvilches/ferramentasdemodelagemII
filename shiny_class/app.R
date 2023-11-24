@@ -19,36 +19,33 @@ ui <- tagList(
     navbarPage(
       # theme = "cerulean",  # <--- To use a theme, uncomment this
       "shinythemes",
-      tabPanel("Navbar 1",
-        sidebarPanel(
-          fileInput("file", "File input:"),
-          textInput("txt", "Text input:", "general"),
-          sliderInput("slider", "Slider input:", 1, 100, 30),
-          tags$h5("Default actionButton:"),
-          actionButton("action", "Search"),
-
-          tags$h5("actionButton with CSS class:"),
-          actionButton("action2", "Action button", class = "btn-primary")
-        ),
-        mainPanel(
-          tabsetPanel(
-            tabPanel("Tab 1",
-              h4("Table"),
-              tableOutput("table"),
-              h4("Verbatim text output"),
-              verbatimTextOutput("txtout"),
-              h1("Header 1"),
-              h2("Header 2"),
-              h3("Header 3"),
-              h4("Header 4"),
-              h5("Header 5")
-            ),
-            tabPanel("Tab 2", "This panel is intentionally left blank"),
-            tabPanel("Tab 3", "This panel is intentionally left blank")
-          )
-        )
+      tabPanel("Iris",
+               sidebarPanel(
+                 checkboxGroupInput("especies", "Espécies",
+                                    choices = c("setosa", "virginica", "versicolor"),
+                                    selected = c("setosa", "virginica", "versicolor")
+                 )
+               ),
+               
+               # Show a plot of the generated distribution
+               mainPanel(
+                 fluidRow(
+                   h1("Histograma"),
+                   plotOutput("distPlot", width = "60%", height = 200)
+                 ),
+                 fluidRow(
+                   h1("Gráfico de espalhamento"),
+                   plotOutput("distPlot2", width = "60%", height = 200)
+                 )
+                 
+               )
       ),
-      tabPanel("Navbar 2", "This panel is intentionally left blank"),
+      tabPanel("Pokemon", 
+                
+                 h1("Atributos dos Pokemons"),
+                 plotOutput("plotpokemon", width = "80%", height = 400)
+               
+      ),
       tabPanel("Navbar 3", "This panel is intentionally left blank")
     )
 )
@@ -82,6 +79,21 @@ server <- function(input, output) {
     
     df <- read.csv("data/Pokemon_full.csv")
     
+    output$plotpokemon <- renderPlot({
+      # generate bins based on input$bins from ui.R
+      df %>% 
+        #filter(type %in% input$types) %>%
+        select(type, hp, attack, defense, speed) %>% 
+        pivot_longer(2:5, names_to = "medida", values_to = "value") %>% 
+        # draw the histogram with the specified number of bins
+        ggplot(aes(x = type, y = value, color = type, fill = type))+
+        geom_boxplot(alpha = 0.4)+
+        facet_wrap(.~medida, nrow = 2)+
+        theme_bw()+
+        theme(
+          axis.text.x = element_blank()
+        )
+    })
     
 }
 
