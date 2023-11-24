@@ -42,8 +42,23 @@ ui <- tagList(
       ),
       tabPanel("Pokemon", 
                 
+               sidebarPanel(
+                 fileInput("arquivo", label = "Selecione seu arquivo pokemon"),
+                 checkboxGroupInput("pokemontype", "Tipo",
+                                    choices = NULL,
+                                    selected = NULL
+                 ),
+                  radioButtons("attribute",
+                               "Atributo",
+                               choices = c("attack", "defense", "speed", "hp", "All"),
+                               selected = "All"
+                  )
+               ),
+               mainPanel(
                  h1("Atributos dos Pokemons"),
                  plotOutput("plotpokemon", width = "80%", height = 400)
+               )
+                 
                
       ),
       tabPanel("Navbar 3", "This panel is intentionally left blank")
@@ -52,6 +67,20 @@ ui <- tagList(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  
+  # Lendo arquivo
+  
+  df <- read.csv("data/Pokemon_full.csv")
+  
+  updateCheckboxGroupInput(
+    session = getDefaultReactiveDomain(),
+    "pokemontype",
+    label = "Tipo",
+    choices = unique(df$type)[order(unique(df$type))],
+    selected = unique(df$type)
+  )
+  
 
     output$distPlot <- renderPlot({
         # generate bins based on input$bins from ui.R
@@ -75,16 +104,14 @@ server <- function(input, output) {
       
     })
     
-    # Lendo arquivo
-    
-    df <- read.csv("data/Pokemon_full.csv")
     
     output$plotpokemon <- renderPlot({
       # generate bins based on input$bins from ui.R
       df %>% 
-        #filter(type %in% input$types) %>%
+        filter(is.null(input$pokemontype) | type %in% input$pokemontype) %>%
         select(type, hp, attack, defense, speed) %>% 
         pivot_longer(2:5, names_to = "medida", values_to = "value") %>% 
+        filter(input$attribute == "All" | medida == input$attribute) %>%
         # draw the histogram with the specified number of bins
         ggplot(aes(x = type, y = value, color = type, fill = type))+
         geom_boxplot(alpha = 0.4)+
