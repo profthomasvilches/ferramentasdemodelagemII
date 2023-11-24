@@ -13,32 +13,43 @@ library(shinythemes)
 library(tidyverse)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- tagList(
     theme = shinytheme("slate"),
     # Application title
-    titlePanel("Teste"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
+    navbarPage(
+      # theme = "cerulean",  # <--- To use a theme, uncomment this
+      "shinythemes",
+      tabPanel("Navbar 1",
         sidebarPanel(
-            checkboxGroupInput("especies", "Espécies",
-                               choices = c("setosa", "virginica", "versicolor"),
-                               selected = c("setosa", "virginica", "versicolor")
-            )
-        ),
+          fileInput("file", "File input:"),
+          textInput("txt", "Text input:", "general"),
+          sliderInput("slider", "Slider input:", 1, 100, 30),
+          tags$h5("Default actionButton:"),
+          actionButton("action", "Search"),
 
-        # Show a plot of the generated distribution
+          tags$h5("actionButton with CSS class:"),
+          actionButton("action2", "Action button", class = "btn-primary")
+        ),
         mainPanel(
-          fluidRow(
-            h1("Histograma"),
-            plotOutput("distPlot", width = "60%", height = 200)
-          ),
-          fluidRow(
-            h1("Gráfico de espalhamento"),
-            plotOutput("distPlot2", width = "60%", height = 200)
+          tabsetPanel(
+            tabPanel("Tab 1",
+              h4("Table"),
+              tableOutput("table"),
+              h4("Verbatim text output"),
+              verbatimTextOutput("txtout"),
+              h1("Header 1"),
+              h2("Header 2"),
+              h3("Header 3"),
+              h4("Header 4"),
+              h5("Header 5")
+            ),
+            tabPanel("Tab 2", "This panel is intentionally left blank"),
+            tabPanel("Tab 3", "This panel is intentionally left blank")
           )
-            
         )
+      ),
+      tabPanel("Navbar 2", "This panel is intentionally left blank"),
+      tabPanel("Navbar 3", "This panel is intentionally left blank")
     )
 )
 
