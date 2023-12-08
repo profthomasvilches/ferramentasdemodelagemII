@@ -8,6 +8,9 @@
 # Cheatsheet
 # https://shiny.posit.co/r/articles/start/cheatsheet/
 
+# app feito em classe
+# https://profthomasvilches.shinyapps.io/shiny_class/
+
 library(shiny)
 library(shinythemes)
 library(tidyverse)
